@@ -30,7 +30,7 @@
     "url": "https://www.3imed-jaberi.com"
   },
   "license": "MIT",
-  "peerDependencies": {
+  "dependencies": {
     "koa-is-json": "^1.0.0"
   },
   "devDependencies": {
