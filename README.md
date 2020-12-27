@@ -30,10 +30,10 @@ Express.js response handler interface for Koa.js (identical).
 ## `Installation`
 
 ```bash
-# npm ..
-$ npm install koa-better-response-handler koa-is-json
-# yarn ..
-$ yarn add koa-better-response-handler koa-is-json
+# npm
+$ npm install koa-better-response-handler
+# yarn
+$ yarn add koa-better-response-handler
 ```
 
 
@@ -58,9 +58,7 @@ By default `koa-better-response-handler` use [koa-is-json] to validate the passe
 
 ```javascript
 app.use(responseHandler({
-  isJSON: () => {
-    // custom json checker
-  }
+  isJSON: () => { /* custom json checker */ }
 }))
 ```
 
