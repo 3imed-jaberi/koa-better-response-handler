@@ -18,22 +18,32 @@
 [license-badge]: https://img.shields.io/badge/license-MIT-green.svg?style=flat-square
 [license-url]: https://github.com/3imed-jaberi/koa-better-response-handler/blob/master/LICENSE
 [code-size-badge]: https://img.shields.io/github/languages/code-size/3imed-jaberi/koa-better-response-handler
-[koa-is-json]: https://github.com/koajs/is-json
-[koa-safe-jsonp]: https://github.com/koajs/koa-safe-jsonp
+
+[Express.js]: https://github.com/expressjs/express
 [koa-views]: https://github.com/queckezz/koa-views
+[jsonp-opts]: https://github.com/node-modules/jsonp-body#jsonpobj-callback-options
 
 <!-- ***************** -->
 
 Express.js response handler interface for Koa.js (identical).
 
+* 🦄 Inspired from [Express.js].
+* 🔥 Amiable and lightweight handler.
+* 💅🏻 Express-style handler (`.send()`, `.json()`, `.render()`, `.jsonp()`, `.statusCode()` etc.)
+* 🎈 Support for `.render()` methods through [koa-views] middelware.
+* ⚖️ Tiny Bundle.
+
 
 ## `Installation`
 
 ```bash
+# koa-is-json: need when you use `.json()` to check passed data is json.
+# jsonp-body: need when you use `.jsonp()` to handle jsonp.
+
 # npm
-$ npm install koa-better-response-handler
+$ npm install koa-better-response-handler koa-is-json jsonp-body
 # yarn
-$ yarn add koa-better-response-handler
+$ yarn add koa-better-response-handler koa-is-json jsonp-body
 ```
 
 
@@ -54,7 +64,9 @@ app.use(responseHandler())
 
 ### `OPTIONS`
 
-By default `koa-better-response-handler` use [koa-is-json] to validate the passed data but you can use your custom json checker function by pass and object like this: 
+By default `koa-better-response-handler` use [koa-is-json] to validate 
+the passed data but you can ignore the installation of `koa-is-json` 
+and use your custom json checker function by pass and object like this: 
 
 ```javascript
 app.use(responseHandler({
@@ -62,9 +74,40 @@ app.use(responseHandler({
 }))
 ```
 
+You can also pass [options][jsonp-opts] object for jsonp;
+
+```javascript
+app.use(responseHandler({
+  isJSON: () => {},
+  jsonpOpts: {
+      callback: '_callback', // default is 'callback'
+      limit: 50 // max callback name string length, default is 512
+  }
+}))
+```
+
+
 ## `Note`
 
-This middelware provide only the missing methods. So, you can use `.jsonp()` by [koa-safe-jsonp] and `.render()` by [koa-views] with this middelware to get all interfaces.
+Make sure to use [koa-views] middelware before use this.
+
+```javascript
+const Koa = require('koa')
+// support boom methods.
+const boom = require('koa-better-boom')
+// support render method.
+const views = require('koa-views')
+// support express handler style.
+const responseHandler = require('koa-better-response-handler')
+
+const app = new Koa()
+
+app
+  .use(boom()) // --> ctx.boom.badRequest().
+  .use(views()) // --> ctx.render().
+  .use(responseHandler())
+```
+
 
 #### License
 ---
