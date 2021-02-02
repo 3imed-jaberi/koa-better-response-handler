@@ -19,6 +19,7 @@
 [license-url]: https://github.com/3imed-jaberi/koa-better-response-handler/blob/master/LICENSE
 [code-size-badge]: https://img.shields.io/github/languages/code-size/3imed-jaberi/koa-better-response-handler
 
+[koa-is-json]: https://github.com/koajs/is-json
 [Express.js]: https://github.com/expressjs/express
 [koa-views]: https://github.com/queckezz/koa-views
 [jsonp-opts]: https://github.com/node-modules/jsonp-body#jsonpobj-callback-options
