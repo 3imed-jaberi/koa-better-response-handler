@@ -11,6 +11,7 @@
  * Module dependencies.
  */
 const _isJSON = require('koa-is-json')
+const _jsonBody = require('jsonp-body')
 
 /**
  * Expose `responseHandler()`.
@@ -24,54 +25,82 @@ module.exports = responseHandler
  * @api public
  */
 function responseHandler (options = {}) {
-  // customize you json validation function
+  // customize you json validation function.
   const isJSON = options.isJSON || _isJSON
 
+  // jsonp options.
+  const jsonpOpts = options.jsonp || {}
+  const callback = jsonpOpts.callback || 'callback'
+
+  // default func used when we don't find requested method in ctx.
+  function defaultNotImplMethods (method, mwModule) {
+    throw new Error(
+      'Can not find the ' + method + ' method inside the context.' +
+      '\n' + 'Make sure that you load the `' + mwModule + '` first.'
+    )
+  }
+
   return (ctx, next) => {
-    // init an local response obejct
+    // integrate with koa-views.
+    const render = {
+      render: !ctx.render
+        ? () => defaultNotImplMethods('render', 'koa-views')
+        : ctx.render
+    }
+
+    // init an local response obejct.
     const response = Object.create(ctx.response)
 
     // all header handlers like append, set,
-    // get, remove are available by default
+    // get, remove are available by default.
 
-    // status handler
+    // status handler.
     response.statusCode = function (code) {
       this.status = code
       return this
     }
 
-    // sendStatus handler
+    // sendStatus handler.
     response.sendStatus = function () {
       this.body = this.message
     }
 
-    // send handler
-    // handled directly with koa
+    // send handler.
     response.send = function (data) {
       this.body = data
     }
 
-    // json handler
+    // json handler.
     response.json = function (data) {
+      // validate the isJSON method.
       if (typeof isJSON !== 'function') {
-        this.throw(500, '`isJSON` option should be a function')
+        throw new Error('`isJSON` option should be a function.')
       }
 
       if (!isJSON(data)) {
-        this.throw(500, 'please use a valid json response')
+        this.throw(500, 'please use a valid json response.')
       }
 
       this.body = data
     }
 
-    // note
-    // use `koa-safe-jsonp` for `jsonp` method
-    // use `koa-views` for the `render` method
+    // jsonp handler.
+    response.jsonp = function (data) {
+      const jsonpFunc = this.query[callback]
 
-    // example: ctx.response.statusCode(200).send('Hello World !')
-    ctx.response = Object.assign(ctx.response, response)
-    // example: ctx.statusCode(200).send('Hello World !')
-    ctx = Object.assign(ctx, ctx.response)
+      if (!jsonpFunc) {
+        this.body = data
+        return
+      }
+
+      this.set('X-Content-Type-Options', 'nosniff')
+      this.type = 'js'
+      this.body = _jsonBody(data, jsonpFunc, jsonpOpts)
+    }
+
+    // append all methods to ctx and ctx.response.
+    ctx.response = Object.assign(ctx.response, response, render)
+    ctx = Object.assign(ctx, ctx.response, render)
 
     return next()
   }
