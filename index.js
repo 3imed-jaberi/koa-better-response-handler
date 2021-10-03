@@ -35,72 +35,63 @@ function responseHandler (options = {}) {
   // default func used when we don't find requested method in ctx.
   function defaultNotImplMethods (method, mwModule) {
     throw new Error(
-      'Can not find the ' + method + ' method inside the context.' +
-      '\n' + 'Make sure that you load the `' + mwModule + '` first.'
+      'Can not find the ' + method + ' method inside the context. \n' +
+      'Make sure that you load the `' + mwModule + '` module first.'
     )
   }
 
   return (ctx, next) => {
-    // integrate with koa-views.
-    const render = {
+    const response = {
+      // all header handlers like append, set,
+      // get, remove are available by default.
+
+      // status handler.
+      statusCode (code) {
+        this.status = code
+        return this
+      },
+      // sendStatus handler.
+      sendStatus () {
+        this.body = this.message
+      },
+      // send handler.
+      send (data) {
+        this.body = data
+      },
+      // json handler.
+      json (data) {
+        // validate the isJSON method.
+        if (typeof isJSON !== 'function') {
+          throw new Error('`isJSON` option should be a function.')
+        }
+
+        if (!isJSON(data)) {
+          this.throw(500, 'please use a valid json response.')
+        }
+
+        this.body = data
+      },
+      // jsonp handler.
+      jsonp (data) {
+        const jsonpFunc = this.query[callback]
+
+        if (!jsonpFunc) {
+          this.body = data
+          return
+        }
+
+        this.set('X-Content-Type-Options', 'nosniff')
+        this.type = 'js'
+        this.body = _jsonBody(data, jsonpFunc, jsonpOpts)
+      },
+      // render handler (integrate with koa-views).
       render: !ctx.render
         ? () => defaultNotImplMethods('render', 'koa-views')
         : ctx.render
     }
 
-    // init an local response obejct.
-    const response = Object.create(ctx.response)
-
-    // all header handlers like append, set,
-    // get, remove are available by default.
-
-    // status handler.
-    response.statusCode = function (code) {
-      this.status = code
-      return this
-    }
-
-    // sendStatus handler.
-    response.sendStatus = function () {
-      this.body = this.message
-    }
-
-    // send handler.
-    response.send = function (data) {
-      this.body = data
-    }
-
-    // json handler.
-    response.json = function (data) {
-      // validate the isJSON method.
-      if (typeof isJSON !== 'function') {
-        throw new Error('`isJSON` option should be a function.')
-      }
-
-      if (!isJSON(data)) {
-        this.throw(500, 'please use a valid json response.')
-      }
-
-      this.body = data
-    }
-
-    // jsonp handler.
-    response.jsonp = function (data) {
-      const jsonpFunc = this.query[callback]
-
-      if (!jsonpFunc) {
-        this.body = data
-        return
-      }
-
-      this.set('X-Content-Type-Options', 'nosniff')
-      this.type = 'js'
-      this.body = _jsonBody(data, jsonpFunc, jsonpOpts)
-    }
-
-    // append all methods to ctx and ctx.response.
-    ctx.response = Object.assign(ctx.response, response, render)
-    ctx = Object.assign(ctx, ctx.response, render)
+    // append all response methods to ctx and ctx.response.
+    Object.assign(ctx, Object.assign(ctx.response, response))
 
     return next()
   }
