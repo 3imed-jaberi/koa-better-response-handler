@@ -1,5 +1,14 @@
 # CHANGE LOG
 
+### v3.0.0 (08 Dec 2021)
+
+- drop support purley for `jsonp` method.
+- support `jsonp` through `koa-safe-jsonp` package.
+
+### v2.1.0 (10 Oct 2021)
+
+- improve the code
+
 ### v2.1.0 (10 Oct 2021)
 
 - improve the code
