@@ -11,7 +11,6 @@
  * Module dependencies.
  */
 const _isJSON = require('koa-is-json')
-const _jsonBody = require('jsonp-body')
 
 /**
  * Expose `responseHandler()`.
@@ -28,10 +27,6 @@ function responseHandler (options = {}) {
   // customize you json validation function.
   const isJSON = options.isJSON || _isJSON
 
-  // jsonp options.
-  const jsonpOpts = options.jsonp || {}
-  const callback = jsonpOpts.callback || 'callback'
-
   // default func used when we don't find requested method in ctx.
   function defaultNotImplMethods (method, mwModule) {
     throw new Error(
@@ -41,7 +36,7 @@ function responseHandler (options = {}) {
   }
 
   return (ctx, next) => {
-    const response = {
+    const responseFactoryObject = {
       // all header handlers like append, set,
       // get, remove are available by default.
 
@@ -61,29 +56,16 @@ function responseHandler (options = {}) {
       // json handler.
       json (data) {
         // validate the isJSON method.
-        if (typeof isJSON !== 'function') {
-          throw new Error('`isJSON` option should be a function.')
-        }
+        if (typeof isJSON !== 'function') throw new Error('`isJSON` option should be a function.')
 
-        if (!isJSON(data)) {
-          this.throw(500, 'please use a valid json response.')
-        }
+        if (!isJSON(data)) this.throw(500, 'please use a valid json response.')
 
         this.body = data
       },
-      // jsonp handler.
-      jsonp (data) {
-        const jsonpFunc = this.query[callback]
-
-        if (!jsonpFunc) {
-          this.body = data
-          return
-        }
-
-        this.set('X-Content-Type-Options', 'nosniff')
-        this.type = 'js'
-        this.body = _jsonBody(data, jsonpFunc, jsonpOpts)
-      },
+      // jsonp handler (integrate with koa-safe-jsonp)..
+      jsonp: !ctx.render
+        ? () => defaultNotImplMethods('jsonp', 'koa-safe-jsonp')
+        : ctx.jsonp,
       // render handler (integrate with koa-views).
       render: !ctx.render
         ? () => defaultNotImplMethods('render', 'koa-views')
@@ -91,7 +73,7 @@ function responseHandler (options = {}) {
     }
 
     // append all response methods to ctx and ctx.response.
-    Object.assign(ctx, Object.assign(ctx.response, response))
+    Object.assign(ctx, Object.assign(ctx.response, responseFactoryObject))
 
     return next()
   }
