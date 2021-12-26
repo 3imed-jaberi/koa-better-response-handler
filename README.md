@@ -71,7 +71,7 @@ and use your custom json checker function by pass and object like this:
 ```javascript
 app.use(
   responseHandler({
-    isJSON: () => {
+    isJSON: (data) => {
       /* custom json checker */
     }
   })
@@ -112,11 +112,9 @@ const responseHandler = require('koa-better-response-handler');
 
 const app = new Koa();
 
-jsonp(app);
+jsonp(app); // --> ctx.jsonp().
 
-app
-  .use(views()) // --> ctx.jsonp().
-  .use(responseHandler());
+app.use(responseHandler());
 ```
 
 [More information about `koa-safe-jsonp`](https://github.com/koajs/koa-safe-jsonp)
