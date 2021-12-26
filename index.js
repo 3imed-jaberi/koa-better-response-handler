@@ -1,7 +1,7 @@
 /*!
  * koa-better-response-handler
  *
- * Copyright(c) 2020 Imed Jaberi
+ * Copyright(c) 2021-2022 Imed Jaberi
  * MIT Licensed
  */
 
@@ -40,6 +40,11 @@ function responseHandler (options = {}) {
       // all header handlers like append, set,
       // get, remove are available by default.
 
+      // // status handler. (--- inspired from fastify ---)
+      // code (code) {
+      //   this.status = code
+      //   return this
+      // },
       // status handler.
       statusCode (code) {
         this.status = code
