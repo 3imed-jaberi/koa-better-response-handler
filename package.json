@@ -1,6 +1,6 @@
 {
   "name": "koa-better-response-handler",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "main": "index.js",
   "description": "Express.js response handler interface for Koa.js (identical).",
   "files": [
