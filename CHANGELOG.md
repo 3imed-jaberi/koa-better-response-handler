@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+### v3.0.1 (08 Dec 2021)
+
+- fix typo inside the README.md file.
+
 ### v3.0.0 (08 Dec 2021)
 
 - drop support purley for `jsonp` method.
