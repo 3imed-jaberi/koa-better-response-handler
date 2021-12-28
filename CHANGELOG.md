@@ -1,6 +1,10 @@
 # CHANGE LOG
 
-### v3.0.1 (08 Dec 2021)
+### v3.1.0 (29 Dec 2021)
+
+- improve the the default intern throw function.
+
+### v3.0.1 (26 Dec 2021)
 
 - fix typo inside the README.md file.
 
