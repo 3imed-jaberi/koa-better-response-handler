@@ -28,10 +28,10 @@ function responseHandler (options = {}) {
   const isJSON = options.isJSON || _isJSON
 
   // default func used when we don't find requested method in ctx.
-  function defaultNotImplMethods (method, mwModule) {
+  const defaultNotImplMethods = (method, mwModule) => () => {
     throw new Error(
-      'Can not find the ' + method + ' method inside the context. \n' +
-      'Make sure that you load the `' + mwModule + '` module first.'
+      `Can not find the ${method} method inside the context. \n` +
+      `Make sure that you load the '${mwModule}' module first.`
     )
   }
 
@@ -69,11 +69,11 @@ function responseHandler (options = {}) {
       },
       // jsonp handler (integrate with koa-safe-jsonp)..
       jsonp: !ctx.render
-        ? () => defaultNotImplMethods('jsonp', 'koa-safe-jsonp')
+        ? defaultNotImplMethods('jsonp', 'koa-safe-jsonp')
         : ctx.jsonp,
       // render handler (integrate with koa-views).
       render: !ctx.render
-        ? () => defaultNotImplMethods('render', 'koa-views')
+        ? defaultNotImplMethods('render', 'koa-views')
         : ctx.render
     }
 
